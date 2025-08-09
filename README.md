@@ -3,7 +3,7 @@
 This repo is a little exercise in building a suuuuper basic C++ renderer from scratch that can read a `.obj` file then output a `.bmp` image
 
 ### Milestones:
-- [ ] draw a gradient on a `.bmp` file
+- [x] draw a gradient on a `.bmp` file
 - [ ] follow the drawing triangles chapter of the tutorial
 - [ ] finish the wireframe of a demon example.
 
