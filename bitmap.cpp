@@ -1,3 +1,4 @@
+#include "bitmap.h"
 #include <vector>
 #include <fstream>
 #include <string>
@@ -5,24 +6,18 @@
 #include <cstring> // for memcpy
 #include <iostream>
 
-#define FILE_HEADER_SIZE 14
-#define DIB_HEADER_SIZE 40
-using namespace std;
-
-class Bitmap {
-    public:
-        int width;
-        int height;
-        vector<unsigned int> pixels;
-        Bitmap(int width, int height);
-        void setPixel(int x, int y, unsigned int color);
-        void writeToBmp(const char *path);
-};
-
 Bitmap::Bitmap(int newWidth, int newHeight) {
     width = newWidth;
     height = newHeight;
     pixels.assign(width * height, 0);
+}
+
+unsigned int rgbToUint(int r, int g, int b){
+    unsigned int color = 0x0;
+    color |= (r & 0xFF) << 16; // Red
+    color |= (g & 0xFF) << 8;  // Green
+    color |= (b & 0xFF);       // Blue
+    return color;
 }
 
 void Bitmap::setPixel(int x, int y, unsigned int color){
@@ -30,7 +25,6 @@ void Bitmap::setPixel(int x, int y, unsigned int color){
         return;
     }
 
-    cout << y * width + x;
     pixels[y * width + x] = color;
 }
 
@@ -99,7 +93,6 @@ void Bitmap::writeToBmp(const char* path){
         cout << "Error opening file";
     }
 
-    cout << fileHeader;
     out.write(reinterpret_cast<char*>(fileHeader), FILE_HEADER_SIZE);
     out.write(reinterpret_cast<char*>(dibHeader), DIB_HEADER_SIZE);
 
@@ -121,21 +114,3 @@ void Bitmap::writeToBmp(const char* path){
 
 }
 
-int main() {
-
-    Bitmap testBMP = Bitmap(200,200);
-    for (int i = 0; i < 100; i++) {
-        testBMP.setPixel(i, 100, 0x00FF00); // should be Green
-    }
-
-    for (int i = 0; i < 100; i++) {
-        testBMP.setPixel(i, 50, 0xFF0000); // should be Red
-    }
-
-    for (int i = 0; i < 100; i++) {
-        testBMP.setPixel(i, 150, 0xFF); // should be Red
-    }
-
-    testBMP.writeToBmp("testfile.bmp");
-
-}
