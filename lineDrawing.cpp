@@ -7,7 +7,20 @@
 
 using namespace std;
 
-void drawLine(int x0, int y0, int x1, int y1, int color, Bitmap &bitmap)
+struct vertex {
+    float x;
+    float y;
+    float z;
+};
+
+unsigned int normalizeCoords(float n) 
+{
+    n *= 20;
+    unsigned int result = static_cast<int>(n);
+    result += 400;  // TODO: change this magic number this is for 800 x 800
+    return result;
+}
+void drawLine(int x0, int y0, int x1, int y1, unsigned int color, Bitmap &bitmap)
 {
     bool steep = false;
     if (abs(x0 - x1) < abs(y0 - y1))
@@ -41,7 +54,7 @@ void drawLine(int x0, int y0, int x1, int y1, int color, Bitmap &bitmap)
 
 int main()
 {
-    Bitmap testMap = Bitmap(400, 400);
+    Bitmap testMap = Bitmap(800, 1600);
 
     ifstream objFile("Among_Us.obj");
     if (!objFile.is_open())
@@ -49,42 +62,72 @@ int main()
         throw std::runtime_error("Could not open file: ");
     }
 
-    string line, nextLine;
-    bool verticesFound;
-    float x0, y0, x1, y1;
-    // skip lines until it starts with "v" (vertex)
-    if (getline(objFile, line)) 
+    string line;
+    bool vertsFound;
+    float x, y, z;
+    vector<vertex> vertices;
+
+    // read the vertices (lines that starts with 'v')
+    while(getline(objFile, line)) 
     {
-        istringstream iss(line);
-        iss.ignore(2, ' '); // ignore the v
-        iss >> x0 >> y0;
-        while (getline(objFile, nextLine))
-        {
-            if (line[0] == 'v')
+        if (line[0] == 'v')
+        {   
+            if (!vertsFound) 
             {
-                if (!verticesFound)
-                {
-                    verticesFound = true;
-                }
-                istringstream iss2(nextLine);
-                iss2.ignore(2, ' '); // ignore the v
-                iss2 >> x1 >> y1;
-
-                // Multiply to match scale then draw line!.
-                x0 *= 100; x1 *= 100; y0 *= 100; y1 *= 100;
-                drawLine(x0, y0, x1, y1, 0xFFFFFF, testMap);
-                cout << x0;
-                // reassign variables for next loop
-                line = nextLine;
-                x0 = x1;
-                y0 = y1;
-
+                vertsFound = true;
             }
-            else if (verticesFound)
-            {
-                break;
-            }
+            istringstream iss(line);
+            iss.ignore(2, ' '); // ignore the v
+            iss >> x >> y >> z;
+            vertices.push_back(vertex{y,z});
+            continue;
+        }
+        else if (vertsFound) {
+            break;
         }
     }
+
+    cout << "size of vertices " << vertices.size() << "\n";
+
+    // read the faces (lines that start with "vf")
+    char dummy;
+    vector<int> vertexIndices;
+    string token;
+    bool facesFound;
+    int tempIndex;
+    int x0, y0, x1, y1;
+    // parse and draw faces line by line
+
+    while(getline(objFile, line)) {
+        if (line[0] == 'f') {
+            if(!facesFound) {
+                facesFound = true;
+            }
+            std::istringstream iss(line);
+            vertexIndices.clear(); // reset array
+            iss >> dummy; // skip the letter f
+
+            for (int i = 0; i < 3; i++) {
+                iss >> token;
+                size_t pos = token.find("//");
+                tempIndex = stoi(token.substr(0, pos));
+                tempIndex -= 1; // obj file's indiecs are 1 indexed, not 0;
+                vertexIndices.push_back(tempIndex);
+            }
+
+            for (int i = 0; i < 3; i++) {
+                int j = (i + 1) % 3;
+                x0 = normalizeCoords(vertices[vertexIndices[i]].x);
+                y0 = normalizeCoords(vertices[vertexIndices[i]].y);
+                x1 = normalizeCoords(vertices[vertexIndices[j]].x);
+                y1 = normalizeCoords(vertices[vertexIndices[j]].y);
+                drawLine(x0, y0, x1, y1, 0xFFFFFF, testMap);
+            }
+        }
+        else if (facesFound) {
+            break;
+        }
+    }
+    
     testMap.writeToBmp("amongus.bmp");
 }

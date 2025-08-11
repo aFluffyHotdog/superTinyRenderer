@@ -21,7 +21,7 @@ unsigned int rgbToUint(int r, int g, int b){
 }
 
 void Bitmap::setPixel(int x, int y, unsigned int color){
-    if (x < 0 || y < 0 || x > width || y > height) {
+    if (x < 0 || y < 0 || x >= width || y >= height) {
         return;
     }
 
