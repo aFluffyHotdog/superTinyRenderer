@@ -6,6 +6,8 @@
 #include <cstring> // for memcpy
 #include <iostream>
 
+using namespace std;
+
 Bitmap::Bitmap(int newWidth, int newHeight) {
     width = newWidth;
     height = newHeight;
