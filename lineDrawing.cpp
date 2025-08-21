@@ -8,9 +8,9 @@
 using namespace std;
 
 struct vertex {
-    float x;
-    float y;
-    float z;
+    int x;
+    int y;
+    int z;
 };
 
 unsigned int normalizeCoords(float n) 
