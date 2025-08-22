@@ -46,6 +46,7 @@ void drawTriangle(vertex a, vertex b, vertex c, unsigned int color, Bitmap &bitm
     }
 }
 
+
 int main()
 {
     // Bitmap testBmp = Bitmap(400,400);
