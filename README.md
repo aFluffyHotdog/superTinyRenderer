@@ -5,9 +5,10 @@ This repo is a little exercise in building a suuuuper basic C++ renderer from sc
 ### Milestones:
 - [x] draw a gradient on a `.bmp` file
 - [x] follow the drawing triangles chapter of the tutorial
-- [x] finish the wireframe of a demon example.
+- [x] finish the wireframe of a demon example
 - [x] finish barycentric coordinates shading
-- [] finish removing hidden faces ch.
+- [] finish removing hidden faces chapter
+- [] refactor model code into an object
 
 
 ### Inspired By: (copied from)

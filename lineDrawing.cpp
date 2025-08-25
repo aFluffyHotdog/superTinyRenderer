@@ -7,11 +7,6 @@
 
 using namespace std;
 
-struct vertex {
-    int x;
-    int y;
-    int z;
-};
 
 unsigned int normalizeCoords(float n) 
 {

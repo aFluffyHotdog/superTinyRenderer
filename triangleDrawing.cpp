@@ -1,4 +1,5 @@
 #include "bitmap.h"
+#include "model.h"
 #include "linedrawing.h"
 #include <iostream>
 #include <fstream>
@@ -44,96 +45,4 @@ void drawTriangle(vertex a, vertex b, vertex c, unsigned int color, Bitmap &bitm
             bitmap.setPixel(x,y, color);
         }
     }
-}
-
-
-int main()
-{
-    // Bitmap testBmp = Bitmap(400,400);
-    // vertex a = {100, 100};
-    // vertex b = {200,200};
-    // vertex c = {100,200};
-    // drawTriangle(a,b,c, 0xFFFFFF, testBmp);
-    // testBmp.writeToBmp("traingle3.bmp");
-
-    // Amongus!
-    Bitmap testMap = Bitmap(800, 1600);
-
-    ifstream objFile("Among_Us.obj");
-    if (!objFile.is_open())
-    {
-        throw std::runtime_error("Could not open file: ");
-    }
-
-    string line;
-    bool vertsFound;
-    float x, y, z;
-    int y_norm, z_norm;
-    vector<vertex> vertices;
-
-    // read the vertices (lines that starts with 'v')
-    while(getline(objFile, line)) 
-    {
-        if (line[0] == 'v')
-        {   
-            if (!vertsFound) 
-            {
-                vertsFound = true;
-            }
-            istringstream iss(line);
-            iss.ignore(2, ' '); // ignore the v
-            iss >> x >> y >> z;
-            y_norm = normalizeCoords(y);
-            z_norm = normalizeCoords(z);
-            vertices.push_back(vertex{y_norm,z_norm});
-            continue;
-        }
-        else if (vertsFound) {
-            break;
-        }
-    }
-
-    cout << "size of vertices " << vertices.size() << "\n";
-
-    // read the faces (lines that start with "vf")
-    char dummy;
-    vector<int> vert_idx;
-    string token;
-    bool facesFound;
-    int tempIndex;
-    int x0, y0, x1, y1;
-    unsigned int random_color;
-    // parse and draw faces line by line
-
-    while(getline(objFile, line)) {
-        if (line[0] == 'f') {
-            if(!facesFound) {
-                facesFound = true;
-            }
-            std::istringstream iss(line);
-            vert_idx.clear(); // reset array
-            iss >> dummy; // skip the letter f
-
-            for (int i = 0; i < 3; i++) {
-                iss >> token;
-                size_t pos = token.find("//");
-                tempIndex = stoi(token.substr(0, pos));
-                tempIndex -= 1; // obj file's indiecs are 1 indexed, not 0;
-                vert_idx.push_back(tempIndex);
-            }
-
-            random_color = randomHexColor();
-            drawTriangle(vertices[vert_idx[0]],
-                vertices[vert_idx[1]],
-                vertices[vert_idx[2]], 
-                random_color, 
-                testMap); 
-                
-        }
-        else if (facesFound) {
-            break;
-        }
-    }
-    
-    testMap.writeToBmp("amongus.bmp");
 }

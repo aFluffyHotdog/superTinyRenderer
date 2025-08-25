@@ -1,10 +1,13 @@
 #include "bitmap.h"
+#include "model.h"
 #include <vector>
 #include <fstream>
 #include <string>
 #include <cstdint>
 #include <cstring> // for memcpy
 #include <iostream>
+#include <cmath>
+
 
 using namespace std;
 
@@ -116,3 +119,12 @@ void Bitmap::writeToBmp(const char* path){
 
 }
 
+double scale(double n) {
+    n *= 20;
+    unsigned int result = static_cast<int>(n);
+    result += 400;  // TODO: change this magic number this is for 800 x 800
+    return result;
+}
+vertex Bitmap::project(vertex v) {
+    return { scale(v.x), scale(v.y), scale(v.z)};
+}

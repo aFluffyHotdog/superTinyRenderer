@@ -1,11 +1,7 @@
 #pragma once
 #include "bitmap.h"
 
-struct vertex {
-    int x;
-    int y;
-    int z;
-};
+
 
 unsigned int normalizeCoords(float n);
 
