@@ -25,6 +25,14 @@ unsigned int rgbToUint(int r, int g, int b){
     return color;
 }
 
+unsigned int Bitmap::getPixel(int x, int y){
+    if (x < 0 || y < 0 || x >= width || y >= height) {
+        return 0;
+    }
+
+    return pixels[y * width + x];
+}
+
 void Bitmap::setPixel(int x, int y, unsigned int color){
     if (x < 0 || y < 0 || x >= width || y >= height) {
         return;
@@ -32,6 +40,8 @@ void Bitmap::setPixel(int x, int y, unsigned int color){
 
     pixels[y * width + x] = color;
 }
+
+
 
 void Bitmap::writeToBmp(const char* path){
 
@@ -119,10 +129,24 @@ void Bitmap::writeToBmp(const char* path){
 
 }
 
+void Bitmap::scale(){
+    // Step 1: Find bounding box
+    float minX = std::numeric_limits<float>::max();
+    float minY = std::numeric_limits<float>::max();
+    float maxX = std::numeric_limits<float>::lowest();
+    float maxY = std::numeric_limits<float>::lowest();
+
+    for (const auto& v : vertices) {
+        if (v.x < minX) minX = v.x;
+        if (v.x > maxX) maxX = v.x;
+        if (v.y < minY) minY = v.y;
+        if (v.y > maxY) maxY = v.y;
+    }
+}
 double scale(double n) {
     n *= 20;
     unsigned int result = static_cast<int>(n);
-    result += 400;  // TODO: change this magic number this is for 800 x 800
+    result += 800;  // TODO: change this magic number this is for 800 x 800
     return result;
 }
 vertex Bitmap::project(vertex v) {

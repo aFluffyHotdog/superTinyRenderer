@@ -3,11 +3,12 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <limits>
 
 using namespace std;
 
 Model::Model(const char* path){
-    ifstream objFile("Among_Us.obj");
+    ifstream objFile(path);
     if (!objFile.is_open())
     {
         throw std::runtime_error("Could not open file: ");
@@ -87,4 +88,45 @@ vector<vertex> Model::getFace(int i) {
     result.push_back(vertices[faces[i][2]]);
 
     return result;
+}
+
+void Model::scale(int width, int height){
+    // Step 1: Find bounding box
+    float minX = numeric_limits<float>::max();
+    float minZ = numeric_limits<float>::max();
+    float minY = numeric_limits<float>::max();
+    float maxX = numeric_limits<float>::lowest();
+    float maxY = numeric_limits<float>::lowest();
+    float maxZ = numeric_limits<float>::lowest();
+
+    for (const auto& v : vertices) {
+        if (v.x < minX) minX = v.x;
+        if (v.x > maxX) maxX = v.x;
+        if (v.y < minY) minY = v.y;
+        if (v.y > maxY) maxY = v.y;
+        if (v.z < minZ) minZ = v.z;
+        if (v.z > maxZ) maxZ = v.z;
+    }
+     // Step 2: Compute scale factors
+    float objWidth = maxX - minX;
+    float objHeight = maxY - minY;
+    float objDepth  = maxZ - minZ;
+
+    float scaleX = (float)width / objWidth;
+    float scaleY = (float)height / objHeight;
+    float scale = std::min(scaleX, scaleY); // preserve aspect ratio
+
+    for (int i = 0; i < n_vertices; i++) {
+        float normX = (vertices[i].x - minX) * scale;
+        float normY = (vertices[i].y - minY) * scale;
+        float normZ = (vertices[i].z - minZ) * scale;
+
+        // center x & y inside canvas; z is just normalized to scale
+        normX += (width  - objWidth  * scale) / 2.0f;
+        normY += (height - objHeight * scale) / 2.0f;
+        // Z doesn’t need centering unless you want a fixed depth range
+        vertices[i].x = normX;
+        vertices[i].y = normY;
+        vertices[i].z = normZ;
+    }
 }

@@ -1,5 +1,4 @@
 #include "bitmap.h"
-#include "linedrawing.h"
 #include "model.h"
 #include <iostream>
 #include <iomanip>
@@ -17,7 +16,6 @@ void drawTriangle(vertex a, vertex b, vertex c, Bitmap &bitmap) {
     int bbmaxx = max(max(a.x, b.x), c.x);
     int bbmaxy = max(max(a.x, b.y), c.y);
     double total_area = triangleArea(a, b, c);
-    cout << "total area:" << total_area << "\n";
 
     #pragma omp parallel for
     for (int x=bbminx; x < bbmaxx; x++){
@@ -27,22 +25,26 @@ void drawTriangle(vertex a, vertex b, vertex c, Bitmap &bitmap) {
             double beta = triangleArea(xy_pair, c, a) / total_area;
             double gamma = triangleArea(xy_pair, a, b) / total_area;  
             if (alpha<0 || beta<0 || gamma<0) continue; // point outside of triangle
-            unsigned int r = static_cast<unsigned int>(alpha * a.z * 1.1);
-            unsigned int g = static_cast<unsigned int>(beta * a.z * 1.1);
-            unsigned int b = static_cast<unsigned int>(gamma * a.z * 1.1);
-            unsigned int color = r << 16;
-            color ^= g << 8;
-            color ^= b;
-
+            // unsigned int r = static_cast<unsigned int>(alpha * a.z * 1.1);
+            // unsigned int g = static_cast<unsigned int>(beta * a.z * 1.1);
+            // unsigned int b = static_cast<unsigned int>(gamma * a.z * 1.1);
+            // unsigned int color = r << 16;
+            // color ^= g << 8;
+            // color ^= b;
             // cout << setfill('0') << setw(8) << hex << color << '\n';
-            bitmap.setPixel(x,y,color);
+            // bitmap.setPixel(x,y,color);
+            unsigned char z = static_cast<unsigned char>(alpha * a.z + beta * b.z + gamma * c.z);
+            if (bitmap.getPixel(x,y) < z){
+                bitmap.setPixel(x,y, z);
+            }
+            
         }
     }
 }
 
 int main (int argc, char* argv[]) {
-    Bitmap testMap = Bitmap(800, 800);
-    Model amongus = Model("Among_Us.obj");
+    Bitmap testMap = Bitmap(3200, 3200);
+    Model amongus = Model("Socrates.obj");
 
     string path = "output/";
     if (argc = 2){

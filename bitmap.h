@@ -9,9 +9,9 @@ class Bitmap {
 public:
     Bitmap(int newWidth, int newHeight);
     vertex project(vertex v);
+    unsigned int getPixel(int x, int y);
     void setPixel(int x, int y, unsigned int color);
-    void writeToBmp(const char* path);
-
+    void writeToBmp(const char *path);
 
     int width;
     int height;
