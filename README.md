@@ -12,6 +12,7 @@ This repo is a little exercise in building a suuuuper basic C++ renderer from sc
 
 Notes:
 - Apparently the new scale method is deleting some faces which is not good.
+- It might not be the scaling algo, I might've messed up the import step whoops
 
 
 ### Inspired By: (copied from)
