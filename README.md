@@ -8,7 +8,10 @@ This repo is a little exercise in building a suuuuper basic C++ renderer from sc
 - [x] finish the wireframe of a demon example
 - [x] finish barycentric coordinates shading
 - [] finish removing hidden faces chapter
-- [] refactor model code into an object
+- [x] refactor model code into an object
+
+Notes:
+- Apparently the new scale method is deleting some faces which is not good.
 
 
 ### Inspired By: (copied from)

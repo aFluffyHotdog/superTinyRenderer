@@ -129,26 +129,46 @@ void Bitmap::writeToBmp(const char* path){
 
 }
 
-void Bitmap::scale(){
-    // Step 1: Find bounding box
-    float minX = std::numeric_limits<float>::max();
-    float minY = std::numeric_limits<float>::max();
-    float maxX = std::numeric_limits<float>::lowest();
-    float maxY = std::numeric_limits<float>::lowest();
 
-    for (const auto& v : vertices) {
+vector<vertex> Bitmap::scale(Model model){
+    // Step 1: Find bounding box
+    float minX = numeric_limits<float>::max();
+    float minZ = numeric_limits<float>::max();
+    float minY = numeric_limits<float>::max();
+    float maxX = numeric_limits<float>::lowest();
+    float maxY = numeric_limits<float>::lowest();
+    float maxZ = numeric_limits<float>::lowest();
+
+    for (const auto& v : model.vertices) {
         if (v.x < minX) minX = v.x;
         if (v.x > maxX) maxX = v.x;
         if (v.y < minY) minY = v.y;
         if (v.y > maxY) maxY = v.y;
+        if (v.z < minZ) minZ = v.z;
+        if (v.z > maxZ) maxZ = v.z;
     }
-}
-double scale(double n) {
-    n *= 20;
-    unsigned int result = static_cast<int>(n);
-    result += 800;  // TODO: change this magic number this is for 800 x 800
-    return result;
-}
-vertex Bitmap::project(vertex v) {
-    return { scale(v.x), scale(v.y), scale(v.z)};
+     // Step 2: Compute scale factors
+    float objWidth = maxX - minX;
+    float objHeight = maxY - minY;
+    float objDepth  = maxZ - minZ;
+
+    float scaleX = (float)width / objWidth;
+    float scaleY = (float)height / objHeight;
+    float scale = std::min(scaleX, scaleY); // preserve aspect ratio
+
+    vector<vertex> scaled;
+    scaled.reserve(model.vertices.size());
+
+    for (int i = 0; i < model.n_vertices; i++) {
+        float normX = (model.vertices[i].x - minX) * scale;
+        float normY = (model.vertices[i].y - minY) * scale;
+        float normZ = (model.vertices[i].z - minZ) / objDepth;
+        normZ *= 255.0f;
+
+        normX += (width  - objWidth  * scale) / 2.0f;
+        normY += (height - objHeight * scale) / 2.0f;
+        scaled.push_back({normX, normY, normZ});
+    }
+
+    return scaled;
 }
