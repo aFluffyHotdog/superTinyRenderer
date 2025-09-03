@@ -2,6 +2,7 @@
 #include "model.h"
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 
 using namespace std;
 
@@ -17,53 +18,48 @@ unsigned int randomHexColor() {
 
     return (r << 16) | (g << 8) | b;
 }
-double triangleArea(vertex a, vertex b, vertex c){
+double triangleArea(vertex_int a, vertex_int b, vertex_int c){
     return 0.5 *((b.y-a.y)*(b.x+a.x) + (c.y-b.y)*(c.x+b.x) + (a.y-c.y)*(a.x+c.x));
 }
 
-void drawTriangle(vertex a, vertex b, vertex c, Bitmap &bitmap) {
+void drawTriangle(vertex_int a, vertex_int b, vertex_int c, Bitmap &bitmap) {
     int bbminx = min(min(a.x, b.x), c.x); // bounding box for the triangle
     int bbminy = min(min(a.y, b.y), c.y); // defined by its top left and bottom right corners
     int bbmaxx = max(max(a.x, b.x), c.x);
-    int bbmaxy = max(max(a.x, b.y), c.y);
+    int bbmaxy = max(max(a.y, b.y), c.y);
+    int painted_pixels = 0;
     double total_area = triangleArea(a, b, c);
+    
     if (total_area<1) return; // backface culling + discarding triangles that cover less than a pixel
-
-    #pragma omp parallel for
+    
+    unsigned int color = randomHexColor();
     for (int x=bbminx; x < bbmaxx; x++){
         for (int y=bbminy; y < bbmaxy; y++){
-            vertex xy_pair = vertex{x,y, 0};
+            vertex_int xy_pair = vertex_int{x,y, 0};
             double alpha = triangleArea(xy_pair, b, c) / total_area;
             double beta = triangleArea(xy_pair, c, a) / total_area;
             double gamma = triangleArea(xy_pair, a, b) / total_area;  
-            if (alpha<0 || beta<0 || gamma<0) continue; // point outside of triangle
-            // unsigned int r = static_cast<unsigned int>(alpha * a.z * 1.1);
-            // unsigned int g = static_cast<unsigned int>(beta * a.z * 1.1);
-            // unsigned int b = static_cast<unsigned int>(gamma * a.z * 1.1);
-            // unsigned int color = r << 16;
-            // color ^= g << 8;
-            // color ^= b;
-            // cout << setfill('0') << setw(8) << hex << color << '\n';
-            // bitmap.setPixel(x,y,color);
+            if (alpha<0 || beta<0 || gamma<0) {
+                continue; // point outside of triangle
+            }
+            unsigned int z = static_cast<unsigned int>(alpha * a.z + beta * b.z + gamma * c.z);
+            if (bitmap.getPixel(x,y) <= z){
+                bitmap.setPixel(x,y, z);
+            }
 
-
-            // unsigned int z = static_cast<unsigned int>(alpha * a.z + beta * b.z + gamma * c.z);
-            // if (bitmap.getPixel(x,y) <= z){
-            //     bitmap.setPixel(x,y, z);
-            // }
-
-            unsigned int color = randomHexColor();
-            bitmap.setPixel(x,y,color);
-
-            
+            painted_pixels++;
         }
     }
 }
 
-
 int main (int argc, char* argv[]) {
-    Bitmap testMap = Bitmap(800, 800);
+    Bitmap testMap = Bitmap(1600, 1600);
     
+    vertex_int a = {377, 445, 143};
+    vertex_int b = {378, 439, 143};
+    vertex_int c = {392, 439, 157};
+    drawTriangle(a,b,c, testMap);
+
     string model_path;
     string path = "output/";
     if (argc = 4){
@@ -76,12 +72,11 @@ int main (int argc, char* argv[]) {
     }
 
     Model amongus = Model(model_path.c_str());
-    vector<vertex> scaled_verts = testMap.scale(amongus);
-    vector<vertex> temp_verts;
+    vector<vertex_int> scaled_verts = testMap.scale(amongus);
+
 
     #pragma omp parallel for
     for (int i = 0; i < amongus.n_faces; i++) {
-        
         drawTriangle(
             scaled_verts[amongus.faces[i][0]],
             scaled_verts[amongus.faces[i][1]],

@@ -8,54 +8,27 @@
 using namespace std;
 
 Model::Model(const char* path){
-    ifstream objFile(path);
-    if (!objFile.is_open())
-    {
-        throw std::runtime_error("Could not open file: ");
-    }
-
-    string line;
-    bool vertsFound;
-    float x, y, z;
-
-    // read the vertices (lines that starts with 'v')
-    while(getline(objFile, line)) 
-    {
-        if (line[0] == 'v')
-        {   
-            if (!vertsFound) 
-            {
-                vertsFound = true;
-            }
-            istringstream iss(line);
-            iss.ignore(2, ' '); // ignore the v
-            iss >> x >> y >> z;
-            vertices.push_back(vertex{x,y,z});
-            continue;
-        }
-        else if (vertsFound) {
-            break;
-        }
-    }
-
-    cout << "No. of vertices found: " << vertices.size() << "\n";
-    n_vertices = vertices.size();
-
-    // read the faces (lines that start with "vf")
+    std::ifstream in;
+    double x,y,z;
+    vector<int> temp_faces;
     char dummy;
     string token;
     vector<int> vert_idx;
     bool facesFound;
     int tempIndex;
-    int x0, y0, x1, y1;
-    // parse and draw faces line by line
 
-    while(getline(objFile, line)) {
-        if (line[0] == 'f') {
-            if(!facesFound) {
-                facesFound = true;
-            }
-            std::istringstream iss(line);
+    in.open(path, std::ifstream::in);
+    if (in.fail()) return;
+    std::string line;
+    while (!in.eof()) {
+        std::getline(in, line);
+        std::istringstream iss(line.c_str());
+        char trash;
+        if (!line.compare(0, 2, "v ")) {
+            iss >> trash;
+            iss >> x >> y >> z;
+            vertices.push_back(vertex{x,y,z});
+        } else if (!line.compare(0, 2, "f ")) {
             vert_idx.clear(); // reset array
             iss >> dummy; // skip the letter f
 
@@ -68,11 +41,9 @@ Model::Model(const char* path){
             }   
             faces.push_back(vert_idx);
         }
-        else if (facesFound) {
-            break;
-        }
     }
-
+    cout << "No. of vertices found: " << vertices.size() << "\n";
+    n_vertices = vertices.size();
     cout << "No. of faces found: " << faces.size() << "\n";
     n_faces = faces.size();
 }

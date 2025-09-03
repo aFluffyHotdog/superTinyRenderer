@@ -113,7 +113,7 @@ void Bitmap::writeToBmp(const char* path){
 
     // Write each pixel from bottom to top
     unsigned char pad[3] = {0,0,0};
-    for (int y = height - 1; y >= 0; --y) {
+    for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             unsigned int color = pixels[y * width + x];
             unsigned char r = (color >> 16) & 0xFF;
@@ -130,14 +130,14 @@ void Bitmap::writeToBmp(const char* path){
 }
 
 
-vector<vertex> Bitmap::scale(Model model){
+vector<vertex_int> Bitmap::scale(Model model){
     // Step 1: Find bounding box
-    float minX = numeric_limits<float>::max();
-    float minZ = numeric_limits<float>::max();
-    float minY = numeric_limits<float>::max();
-    float maxX = numeric_limits<float>::lowest();
-    float maxY = numeric_limits<float>::lowest();
-    float maxZ = numeric_limits<float>::lowest();
+    double minX = numeric_limits<double>::max();
+    double minZ = numeric_limits<double>::max();
+    double minY = numeric_limits<double>::max();
+    double maxX = numeric_limits<double>::lowest();
+    double maxY = numeric_limits<double>::lowest();
+    double maxZ = numeric_limits<double>::lowest();
 
     for (const auto& v : model.vertices) {
         if (v.x < minX) minX = v.x;
@@ -148,25 +148,24 @@ vector<vertex> Bitmap::scale(Model model){
         if (v.z > maxZ) maxZ = v.z;
     }
      // Step 2: Compute scale factors
-    float objWidth = maxX - minX;
-    float objHeight = maxY - minY;
-    float objDepth  = maxZ - minZ;
+    double objWidth = maxX - minX;
+    double objHeight = maxY - minY;
+    double objDepth  = maxZ - minZ;
 
-    float scaleX = (float)width / objWidth;
-    float scaleY = (float)height / objHeight;
-    float scale = std::min(scaleX, scaleY); // preserve aspect ratio
+    double scaleX = (double)width / objWidth;
+    double scaleY = (double)height / objHeight;
+    double scale = std::min(scaleX, scaleY); // preserve aspect ratio
 
-    vector<vertex> scaled;
+    vector<vertex_int> scaled;
     scaled.reserve(model.vertices.size());
 
     for (int i = 0; i < model.n_vertices; i++) {
-        float normX = (model.vertices[i].x - minX) * scale;
-        float normY = (model.vertices[i].y - minY) * scale;
-        float normZ = (model.vertices[i].z - minZ) / objDepth;
-        normZ *= 255.0f;
+        int normX = (model.vertices[i].x - minX) * scale;
+        int normY = (model.vertices[i].y - minY) * scale;
+        int normZ = (model.vertices[i].z - minZ) * 255 / objDepth;
 
-        normX += (width  - objWidth  * scale) / 2.0f;
-        normY += (height - objHeight * scale) / 2.0f;
+        normX += round((width  - objWidth  * scale) / 2);
+        normY += round((height - objHeight * scale) / 2);
         scaled.push_back({normX, normY, normZ});
     }
 

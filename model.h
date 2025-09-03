@@ -7,6 +7,14 @@ struct vertex {
     double z;
 };
 
+// we use integers for drawing, wish we could have a more elegant solution but here we go..
+struct vertex_int {
+    int x;
+    int y;
+    int z;
+};
+
+
 class Model {
 public:
     Model(const char* path);
