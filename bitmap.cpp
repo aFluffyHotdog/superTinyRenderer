@@ -130,7 +130,7 @@ void Bitmap::writeToBmp(const char* path){
 }
 
 
-vector<vertex_int> Bitmap::scale(Model model){
+vector<vertex> Bitmap::scale(Model model){
     // Step 1: Find bounding box
     double minX = numeric_limits<double>::max();
     double minZ = numeric_limits<double>::max();
@@ -156,13 +156,13 @@ vector<vertex_int> Bitmap::scale(Model model){
     double scaleY = (double)height / objHeight;
     double scale = std::min(scaleX, scaleY); // preserve aspect ratio
 
-    vector<vertex_int> scaled;
+    vector<vertex> scaled;
     scaled.reserve(model.vertices.size());
 
     for (int i = 0; i < model.n_vertices; i++) {
-        int normX = (model.vertices[i].x - minX) * scale;
-        int normY = (model.vertices[i].y - minY) * scale;
-        int normZ = (model.vertices[i].z - minZ) * 255 / objDepth;
+        double normX = (model.vertices[i].x - minX) * scale;
+        double normY = (model.vertices[i].y - minY) * scale;
+        double normZ = (model.vertices[i].z - minZ) * 255 / objDepth;
 
         normX += round((width  - objWidth  * scale) / 2);
         normY += round((height - objHeight * scale) / 2);
