@@ -15,6 +15,8 @@ This repo is a little exercise in building a suuuuper basic C++ renderer from sc
 - [x] finish barycentric coordinates shading
 - [x] finish removing hidden faces chapter
 - [x] refactor model code into an object
+- [] refactor the 2 vertex classes into eigen library objects
+- [] finish the "better camera" chapter
 
 
 
